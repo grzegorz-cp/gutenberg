@@ -114,4 +114,24 @@ describe( 'DatePicker', () => {
 		} ) as HTMLButtonElement;
 		expect( button ).toBeDisabled();
 	} );
+
+	it( 'should add custom class to the given day', () => {
+		const customClass = 'custom-class';
+		render(
+			<DatePicker
+				currentDate="2022-05-02T11:00:00"
+				dayProps={ [
+					{
+						date: new Date( '2022-05-20T00:00:00' ),
+						className: customClass,
+					},
+				] }
+			/>
+		);
+
+		const dayButton = screen.getByRole( 'button', {
+			name: 'May 20, 2022',
+		} );
+		expect( dayButton ).toHaveClass( customClass );
+	} );
 } );

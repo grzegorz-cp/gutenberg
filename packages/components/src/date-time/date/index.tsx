@@ -65,6 +65,7 @@ export function DatePicker( {
 	currentDate,
 	onChange,
 	events = [],
+	dayProps = [],
 	isInvalidDate,
 	onMonthPreviewed,
 	startOfWeek: weekStartsOn = 0,
@@ -171,6 +172,11 @@ export function DatePicker( {
 								key={ day.toString() }
 								day={ day }
 								column={ index + 1 }
+								className={
+									dayProps.filter( ( dayProp ) =>
+										isSameDay( dayProp.date, day )
+									)?.[ 0 ]?.className
+								}
 								isSelected={ isSelected( day ) }
 								isFocusable={ isEqual( day, focusable ) }
 								isFocusAllowed={ isFocusWithinCalendar }
@@ -267,6 +273,7 @@ export function DatePicker( {
 type DayProps = {
 	day: Date;
 	column: number;
+	className?: string;
 	isSelected: boolean;
 	isFocusable: boolean;
 	isFocusAllowed: boolean;
@@ -280,6 +287,7 @@ type DayProps = {
 function Day( {
 	day,
 	column,
+	className,
 	isSelected,
 	isFocusable,
 	isFocusAllowed,
@@ -306,7 +314,7 @@ function Day( {
 	return (
 		<DayButton
 			ref={ ref }
-			className="components-datetime__date__day" // Unused, for backwards compatibility.
+			className={ `components-datetime__date__day ${ className }` }
 			disabled={ isInvalid }
 			tabIndex={ isFocusable ? 0 : -1 }
 			aria-label={ getDayLabel( day, isSelected, numEvents ) }

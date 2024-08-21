@@ -69,3 +69,16 @@ WithInvalidDates.args = {
 	currentDate: new Date(),
 	isInvalidDate: isWeekend,
 };
+
+export const WithCustomDayClass: StoryFn< typeof DatePicker > = Template.bind(
+	{}
+);
+WithCustomDayClass.args = {
+	currentDate: new Date(),
+	dayProps: [
+		{ date: daysFromNow( 2 ), className: 'custom-class-1' },
+		{ date: daysFromNow( 4 ), className: 'custom-class-2' },
+		{ date: daysFromNow( 6 ), className: 'custom-class-2' },
+		{ date: daysFromNow( 8 ), className: 'custom-class-3' },
+	],
+};

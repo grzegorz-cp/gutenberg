@@ -95,6 +95,17 @@ export type DatePickerEvent = {
 	date: Date;
 };
 
+export type DatePickerDayProp = {
+	/**
+	 * The date of the event.
+	 */
+	date: Date;
+	/**
+	 * The CSS class to apply to the day.
+	 */
+	className: string;
+};
+
 export type DatePickerProps = {
 	/**
 	 * The current date and time at initialization. Optionally pass in a `null`
@@ -127,6 +138,11 @@ export type DatePickerProps = {
 	 * dot on the day of the event.
 	 */
 	events?: DatePickerEvent[];
+
+	/**
+	 * List of days and CSS class to apply to the day.
+	 */
+	dayProps?: DatePickerDayProp[];
 
 	/**
 	 * The day that the week should start on. 0 for Sunday, 1 for Monday, etc.
