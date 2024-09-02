@@ -62,15 +62,20 @@ import { TIMEZONELESS_FORMAT } from '../constants';
  * ```
  */
 export function DatePicker( {
-	currentDate,
+	currentDate, // either highlight a visible day with selecting or use previewDate
+	previewDate, // current date without a selection
 	onChange,
 	events = [],
 	dayProps = [],
+	highlightedRange = [],
 	isInvalidDate,
 	onMonthPreviewed,
 	startOfWeek: weekStartsOn = 0,
+	disableStartNavigation,
+	disableEndNavigation,
 }: DatePickerProps ) {
-	const date = currentDate ? inputToDate( currentDate ) : new Date();
+	let date = currentDate ? inputToDate( currentDate ) : new Date();
+	date = previewDate ? inputToDate( previewDate ) : new Date();
 
 	const {
 		calendar,
@@ -81,7 +86,7 @@ export function DatePicker( {
 		viewPreviousMonth,
 		viewNextMonth,
 	} = useLilius( {
-		selected: [ startOfDay( date ) ],
+		selected: !! previewDate ? [] : [ startOfDay( date ) ],
 		viewing: startOfDay( date ),
 		weekStartsOn,
 	} );
@@ -98,11 +103,18 @@ export function DatePicker( {
 
 	// Update internal state when currentDate prop changes.
 	const [ prevCurrentDate, setPrevCurrentDate ] = useState( currentDate );
+	const [ prevPreviewDate, setPrevPreviewDate ] = useState( previewDate );
 	if ( currentDate !== prevCurrentDate ) {
 		setPrevCurrentDate( currentDate );
 		setSelected( [ startOfDay( date ) ] );
 		setViewing( startOfDay( date ) );
 		setFocusable( startOfDay( date ) );
+	}
+	// looks like useEffect walkaround
+	if ( previewDate !== prevPreviewDate ) {
+		setPrevPreviewDate( previewDate );
+		setSelected( !! previewDate ? [] : [ startOfDay( date ) ] );
+		setViewing( startOfDay( date ) );
 	}
 
 	return (
@@ -112,21 +124,23 @@ export function DatePicker( {
 			aria-label={ __( 'Calendar' ) }
 		>
 			<Navigator>
-				<Button
-					icon={ isRTL() ? arrowRight : arrowLeft }
-					variant="tertiary"
-					aria-label={ __( 'View previous month' ) }
-					onClick={ () => {
-						viewPreviousMonth();
-						setFocusable( subMonths( focusable, 1 ) );
-						onMonthPreviewed?.(
-							format(
-								subMonths( viewing, 1 ),
-								TIMEZONELESS_FORMAT
-							)
-						);
-					} }
-				/>
+				{ ! disableStartNavigation && (
+					<Button
+						icon={ isRTL() ? arrowRight : arrowLeft }
+						variant="tertiary"
+						aria-label={ __( 'View previous month' ) }
+						onClick={ () => {
+							viewPreviousMonth();
+							setFocusable( subMonths( focusable, 1 ) );
+							onMonthPreviewed?.(
+								format(
+									subMonths( viewing, 1 ),
+									TIMEZONELESS_FORMAT
+								)
+							);
+						} }
+					/>
+				) }
 				<NavigatorHeading level={ 3 }>
 					<strong>
 						{ dateI18n(
@@ -137,21 +151,23 @@ export function DatePicker( {
 					</strong>{ ' ' }
 					{ dateI18n( 'Y', viewing, -viewing.getTimezoneOffset() ) }
 				</NavigatorHeading>
-				<Button
-					icon={ isRTL() ? arrowLeft : arrowRight }
-					variant="tertiary"
-					aria-label={ __( 'View next month' ) }
-					onClick={ () => {
-						viewNextMonth();
-						setFocusable( addMonths( focusable, 1 ) );
-						onMonthPreviewed?.(
-							format(
-								addMonths( viewing, 1 ),
-								TIMEZONELESS_FORMAT
-							)
-						);
-					} }
-				/>
+				{ ! disableEndNavigation && (
+					<Button
+						icon={ isRTL() ? arrowLeft : arrowRight }
+						variant="tertiary"
+						aria-label={ __( 'View next month' ) }
+						onClick={ () => {
+							viewNextMonth();
+							setFocusable( addMonths( focusable, 1 ) );
+							onMonthPreviewed?.(
+								format(
+									addMonths( viewing, 1 ),
+									TIMEZONELESS_FORMAT
+								)
+							);
+						} }
+					/>
+				) }
 			</Navigator>
 			<Calendar
 				onFocus={ () => setIsFocusWithinCalendar( true ) }
@@ -178,6 +194,11 @@ export function DatePicker( {
 									)?.[ 0 ]?.className
 								}
 								isSelected={ isSelected( day ) }
+								isHighlighted={
+									!! highlightedRange?.find( ( item ) =>
+										isSameDay( item, day )
+									)
+								}
 								isFocusable={ isEqual( day, focusable ) }
 								isFocusAllowed={ isFocusWithinCalendar }
 								isToday={ isSameDay( day, new Date() ) }
@@ -275,6 +296,7 @@ type DayProps = {
 	column: number;
 	className?: string;
 	isSelected: boolean;
+	isHighlighted: boolean;
 	isFocusable: boolean;
 	isFocusAllowed: boolean;
 	isToday: boolean;
@@ -289,6 +311,7 @@ function Day( {
 	column,
 	className,
 	isSelected,
+	isHighlighted,
 	isFocusable,
 	isFocusAllowed,
 	isToday,
@@ -314,6 +337,7 @@ function Day( {
 	return (
 		<DayButton
 			ref={ ref }
+			style={ isHighlighted ? { background: 'steelblue' } : {} } // convert to a class and apply CSS
 			className={ `components-datetime__date__day ${ className }` }
 			disabled={ isInvalid }
 			tabIndex={ isFocusable ? 0 : -1 }

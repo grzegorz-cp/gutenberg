@@ -112,6 +112,7 @@ export type DatePickerProps = {
 	 * value to specify no date is currently selected.
 	 */
 	currentDate?: Date | string | number | null;
+	previewDate?: Date | string | number | null;
 
 	/**
 	 * The function called when a new date has been selected. It is passed the
@@ -143,6 +144,7 @@ export type DatePickerProps = {
 	 * List of days and CSS class to apply to the day.
 	 */
 	dayProps?: DatePickerDayProp[];
+	highlightedRange?: Date[] | string[];
 
 	/**
 	 * The day that the week should start on. 0 for Sunday, 1 for Monday, etc.
@@ -150,6 +152,9 @@ export type DatePickerProps = {
 	 * @default 0
 	 */
 	startOfWeek?: 0 | 1 | 2 | 3 | 4 | 5 | 6;
+
+	disableStartNavigation?: boolean;
+	disableEndNavigation?: boolean;
 };
 
 export type DateTimePickerProps = Omit< DatePickerProps, 'onChange' > &
@@ -163,3 +168,18 @@ export type DateTimePickerProps = Omit< DatePickerProps, 'onChange' > &
 		 */
 		onChange?: ( date: string | null ) => void;
 	};
+
+export type DateRangePickerProps = Omit< DatePickerProps, 'onChange' > & {
+	/**
+	 * The function called when a new date or time has been selected. It is
+	 * passed the date and time as an argument.
+	 */
+	className?: string;
+	onChangeStart?: ( date: string | null ) => void;
+	onChangeEnd?: ( date: string | null ) => void;
+	currentDateStart?: Date | string | number | null;
+	currentDateEnd?: Date | string | number | null;
+	selectedRange?: Date[];
+	onMonthPreviewedStart?: ( date: string ) => void;
+	onMonthPreviewedEnd?: ( date: string ) => void;
+};
